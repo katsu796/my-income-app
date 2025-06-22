@@ -145,124 +145,37 @@ export default function 家計簿() {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
       }}
     >
-      <div style={{ marginTop: "20px" }}>
-        <h3>📅 カレンダー</h3>
-        <Calendar
-          onChange={setSelectedDate}
-          value={selectedDate}
-          tileContent={tileContent}
-        />
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
-          <button onClick={handlePrevMonth}>← 前の月</button>
-          <button onClick={handleNextMonth}>次の月 →</button>
-        </div>
-      </div>
+      {/* ...既存セクション省略... */}
 
       <div style={{ marginTop: "30px" }}>
-        <h3>📝 入力フォーム</h3>
-        <input
-          type="number"
-          placeholder="収入"
-          value={income}
-          onChange={(e) => setIncome(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="支出"
-          value={expense}
-          onChange={(e) => setExpense(e.target.value)}
-        />
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          style={{
-            display: "block",
-            marginTop: "8px",
-            padding: "5px",
-            fontSize: "14px",
-            borderRadius: "4px",
-            borderColor: "#ccc",
-          }}
-        >
-          <option value="">カテゴリを選択</option>
-          {CATEGORY_LIST.map((cat) => (
-            <option key={cat.name} value={cat.name}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setReceipt(e.target.files[0])}
-        />
-        <button onClick={handleAddEntry} style={{ marginTop: "10px" }}>追加</button>
-      </div>
-
-      <div style={{ marginTop: "30px" }}>
-        <h3>📋 日別詳細</h3>
-        {getDateDetails().map((entry, i) => (
-          <div key={i} style={{
-            backgroundColor: "#f9f9f9",
-            margin: "6px 0",
-            padding: "8px",
-            borderRadius: "6px",
-            fontSize: "13px",
-            borderLeft: `5px solid ${getCategoryColor(entry.category)}`
-          }}>
-            <div>📅 {entry.date}</div>
-            <div>📂 カテゴリ: {entry.category}</div>
-            <div>💰 収入: ¥{entry.income} / 支出: ¥{entry.expense}</div>
-            {entry.receiptUrl && (
-              <div>
-                🧾 レシート:<br />
-                <img src={entry.receiptUrl} alt="receipt" style={{ width: "100%", maxHeight: "120px", objectFit: "contain" }} />
-              </div>
-            )}
-            <button onClick={() => handleDeleteEntry(i)} style={{ marginTop: "5px", backgroundColor: "#e57373", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px" }}>
-              削除
-            </button>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginTop: "30px" }}>
-        <h3>📊 月別棒グラフ</h3>
-        <div style={{ width: "100%", height: "200px" }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={getMonthEntries()} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
-              <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Bar dataKey="income" fill="green" name="収入" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="expense" fill="red" name="支出" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div style={{ marginTop: "30px" }}>
-        <h3>📈 支出カテゴリ円グラフ</h3>
-        <div style={{ width: "100%", height: "220px" }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={getPieChartData()}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={70}
-                label
-              >
-                {getPieChartData().map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name)} />
-                ))}
-              </Pie>
-              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        <h3>📚 履歴（すべてのエントリー）</h3>
+        {entries.length === 0 ? (
+          <p>データがありません。</p>
+        ) : (
+          entries.map((entry, i) => (
+            <div key={i} style={{
+              backgroundColor: "#f0f0f0",
+              margin: "6px 0",
+              padding: "8px",
+              borderRadius: "6px",
+              fontSize: "13px",
+              borderLeft: `5px solid ${getCategoryColor(entry.category)}`
+            }}>
+              <div>📅 {entry.date}</div>
+              <div>📂 カテゴリ: {entry.category}</div>
+              <div>💰 収入: ¥{entry.income} / 支出: ¥{entry.expense}</div>
+              {entry.receiptUrl && (
+                <div>
+                  🧾 レシート:<br />
+                  <img src={entry.receiptUrl} alt="receipt" style={{ width: "100%", maxHeight: "120px", objectFit: "contain" }} />
+                </div>
+              )}
+              <button onClick={() => handleDeleteEntry(i)} style={{ marginTop: "5px", backgroundColor: "#e57373", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px" }}>
+                削除
+              </button>
+            </div>
+          ))
+        )}
       </div>
     </motion.div>
   );
