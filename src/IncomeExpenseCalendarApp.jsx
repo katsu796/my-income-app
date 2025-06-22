@@ -13,18 +13,18 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
-const CATEGORY_COLORS_MAP = {
-  食費: "#FF6384",
-  交通費: "#FFCE56",
-  娯楽: "#36A2EB",
-  光熱費: "#4BC0C0",
-  通信費: "#9966FF",
-  その他: "#FF9F40",
-  未分類: "#8884d8",
-};
-const CATEGORY_COLORS = Object.values(CATEGORY_COLORS_MAP);
+const CATEGORY_LIST = [
+  { name: "食費", color: "#FF6384" },
+  { name: "交通", color: "#FFCE56" },
+  { name: "日用品", color: "#36A2EB" },
+  { name: "交際費", color: "#4BC0C0" },
+  { name: "趣味", color: "#9966FF" },
+  { name: "医療", color: "#FF9F40" },
+  { name: "その他", color: "#A9A9A9" },
+];
+
 const DEFAULT_CATEGORY = "未分類";
 
 export default function IncomeExpenseCalendarApp() {
@@ -91,6 +91,11 @@ export default function IncomeExpenseCalendarApp() {
     return Object.entries(dataMap).map(([name, value]) => ({ name, value }));
   };
 
+  const getCategoryColor = (categoryName) => {
+    const found = CATEGORY_LIST.find((cat) => cat.name === categoryName);
+    return found ? found.color : "#ccc";
+  };
+
   const getDateDetails = () => {
     const dateStr = selectedDate.toISOString().split("T")[0];
     return entries.filter((e) => e.date === dateStr);
@@ -133,20 +138,94 @@ export default function IncomeExpenseCalendarApp() {
         boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
       }}
     >
+      <div style={{ marginTop: "20px" }}>
+        <h3>📅 カレンダー</h3>
+        <Calendar
+          onChange={setSelectedDate}
+          value={selectedDate}
+          tileContent={tileContent}
+        />
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px" }}>
+          <button onClick={handlePrevMonth}>← 前の月</button>
+          <button onClick={handleNextMonth}>次の月 →</button>
+        </div>
+      </div>
+
+      <div style={{ marginTop: "30px" }}>
+        <h3>📝 入力フォーム</h3>
+        <input
+          type="number"
+          placeholder="収入"
+          value={income}
+          onChange={(e) => setIncome(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="支出"
+          value={expense}
+          onChange={(e) => setExpense(e.target.value)}
+        />
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          style={{
+            display: "block",
+            marginTop: "8px",
+            padding: "5px",
+            fontSize: "14px",
+            borderRadius: "4px",
+            borderColor: "#ccc",
+          }}
+        >
+          <option value="">カテゴリを選択</option>
+          {CATEGORY_LIST.map((cat) => (
+            <option key={cat.name} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setReceipt(e.target.files[0])}
+        />
+        <button onClick={handleAddEntry} style={{ marginTop: "10px" }}>追加</button>
+      </div>
+
+      <div style={{ marginTop: "30px" }}>
+        <h3>📋 日別詳細</h3>
+        {getDateDetails().map((entry, i) => (
+          <div key={i} style={{
+            backgroundColor: "#f9f9f9",
+            margin: "6px 0",
+            padding: "8px",
+            borderRadius: "6px",
+            fontSize: "13px",
+            borderLeft: `5px solid ${getCategoryColor(entry.category)}`
+          }}>
+            <div>📅 {entry.date}</div>
+            <div>📂 カテゴリ: {entry.category}</div>
+            <div>💰 収入: ¥{entry.income} / 支出: ¥{entry.expense}</div>
+            {entry.receiptUrl && (
+              <div>
+                🧾 レシート:<br />
+                <img src={entry.receiptUrl} alt="receipt" style={{ width: "100%", maxHeight: "120px", objectFit: "contain" }} />
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
       <div style={{ marginTop: "30px" }}>
         <h3>📊 月別棒グラフ</h3>
         <div style={{ width: "100%", height: "200px" }}>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={getMonthEntries()}
-              margin={{ top: 5, right: 10, bottom: 5, left: -10 }}
-              barCategoryGap={8}
-            >
+            <BarChart data={getMonthEntries()} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
               <XAxis dataKey="date" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip />
-              <Bar dataKey="income" fill="green" name="収入" radius={[8, 8, 0, 0]} isAnimationActive={true} />
-              <Bar dataKey="expense" fill="red" name="支出" radius={[8, 8, 0, 0]} isAnimationActive={true} />
+              <Bar dataKey="income" fill="green" name="収入" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="expense" fill="red" name="支出" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -165,13 +244,9 @@ export default function IncomeExpenseCalendarApp() {
                 cy="50%"
                 outerRadius={70}
                 label
-                isAnimationActive={true}
               >
                 {getPieChartData().map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={CATEGORY_COLORS_MAP[entry.name] || CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
-                  />
+                  <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name)} />
                 ))}
               </Pie>
               <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
