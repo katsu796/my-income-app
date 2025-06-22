@@ -22,12 +22,13 @@ const CATEGORY_LIST = [
   { name: "交際費", color: "#4BC0C0" },
   { name: "趣味", color: "#9966FF" },
   { name: "医療", color: "#FF9F40" },
+  { name: "給与", color: "#8BC34A" },
   { name: "その他", color: "#A9A9A9" },
 ];
 
 const DEFAULT_CATEGORY = "未分類";
 
-export default function IncomeExpenseCalendarApp() {
+export default function 家計簿() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [entries, setEntries] = useState([]);
   const [income, setIncome] = useState("");
@@ -73,6 +74,12 @@ export default function IncomeExpenseCalendarApp() {
     setExpense("");
     setCategory("");
     setReceipt(null);
+  };
+
+  const handleDeleteEntry = (index) => {
+    const newEntries = [...entries];
+    newEntries.splice(index, 1);
+    setEntries(newEntries);
   };
 
   const getMonthEntries = () => {
@@ -212,6 +219,9 @@ export default function IncomeExpenseCalendarApp() {
                 <img src={entry.receiptUrl} alt="receipt" style={{ width: "100%", maxHeight: "120px", objectFit: "contain" }} />
               </div>
             )}
+            <button onClick={() => handleDeleteEntry(i)} style={{ marginTop: "5px", backgroundColor: "#e57373", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px" }}>
+              削除
+            </button>
           </div>
         ))}
       </div>
