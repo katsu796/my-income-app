@@ -23,6 +23,12 @@ const CATEGORY_LIST = [
   { name: "趣味", color: "#9966FF" },
   { name: "医療", color: "#FF9F40" },
   { name: "給与", color: "#8BC34A" },
+  { name: "教育", color: "#00BCD4" },
+  { name: "保険", color: "#795548" },
+  { name: "ペット", color: "#CDDC39" },
+  { name: "通信", color: "#607D8B" },
+  { name: "光熱費", color: "#FF5722" },
+  { name: "家賃", color: "#9C27B0" },
   { name: "その他", color: "#A9A9A9" },
 ];
 
@@ -127,7 +133,7 @@ export default function 家計簿() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       style={{
@@ -136,14 +142,20 @@ export default function 家計簿() {
         width: "min(100%, 480px)",
         margin: "0 auto",
         fontSize: "15px",
-        lineHeight: "1.6",
         fontFamily: "'Segoe UI', sans-serif",
-        backgroundColor: "#fefefe",
+        backgroundColor: "#ffffff",
         borderRadius: "12px",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
       }}
     >
-      <h2 style={{ textAlign: "center" }}>バイト収支カレンダー</h2>
+      <motion.h2
+        initial={{ scale: 0.9 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.3 }}
+        style={{ textAlign: "center" }}
+      >
+        📖 家計簿アプリ
+      </motion.h2>
 
       <div style={{ marginTop: "20px" }}>
         <h3>📅 カレンダー</h3>
@@ -160,56 +172,43 @@ export default function 家計簿() {
 
       <div style={{ marginTop: "30px" }}>
         <h3>📝 入力フォーム</h3>
-        <input
-          type="number"
-          placeholder="収入"
-          value={income}
-          onChange={(e) => setIncome(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="支出"
-          value={expense}
-          onChange={(e) => setExpense(e.target.value)}
-        />
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          style={{
-            display: "block",
-            marginTop: "8px",
-            padding: "5px",
-            fontSize: "14px",
-            borderRadius: "4px",
-            borderColor: "#ccc",
-          }}
-        >
+        <input type="number" placeholder="収入" value={income} onChange={(e) => setIncome(e.target.value)} />
+        <input type="number" placeholder="支出" value={expense} onChange={(e) => setExpense(e.target.value)} />
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">カテゴリを選択</option>
           {CATEGORY_LIST.map((cat) => (
-            <option key={cat.name} value={cat.name}>
+            <motion.option
+              key={cat.name}
+              value={cat.name}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
               {cat.name}
-            </option>
+            </motion.option>
           ))}
         </select>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setReceipt(e.target.files[0])}
-        />
+        <input type="file" accept="image/*" onChange={(e) => setReceipt(e.target.files[0])} />
         <button onClick={handleAddEntry} style={{ marginTop: "10px" }}>追加</button>
       </div>
 
       <div style={{ marginTop: "30px" }}>
         <h3>📋 日別詳細</h3>
         {getDateDetails().map((entry, i) => (
-          <div key={i} style={{
-            backgroundColor: "#f9f9f9",
-            margin: "6px 0",
-            padding: "8px",
-            borderRadius: "6px",
-            fontSize: "13px",
-            borderLeft: `5px solid ${getCategoryColor(entry.category)}`
-          }}>
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            style={{
+              backgroundColor: "#f9f9f9",
+              margin: "6px 0",
+              padding: "8px",
+              borderRadius: "6px",
+              fontSize: "13px",
+              borderLeft: `5px solid ${getCategoryColor(entry.category)}`
+            }}
+          >
             <div>📅 {entry.date}</div>
             <div>📂 カテゴリ: {entry.category}</div>
             <div>💰 収入: ¥{entry.income} / 支出: ¥{entry.expense}</div>
@@ -219,50 +218,45 @@ export default function 家計簿() {
                 <img src={entry.receiptUrl} alt="receipt" style={{ width: "100%", maxHeight: "120px", objectFit: "contain" }} />
               </div>
             )}
-            <button onClick={() => handleDeleteEntry(entries.indexOf(entry))} style={{ marginTop: "5px", backgroundColor: "#e57373", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px" }}>
-              削除
-            </button>
-          </div>
+            <button onClick={() => handleDeleteEntry(entries.indexOf(entry))} style={{ marginTop: "5px", backgroundColor: "#e57373", color: "white", border: "none", padding: "5px 10px", borderRadius: "4px" }}>削除</button>
+          </motion.div>
         ))}
       </div>
 
       <div style={{ marginTop: "30px" }}>
         <h3>📊 月別棒グラフ</h3>
-        <div style={{ width: "100%", height: "200px" }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={getMonthEntries()} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
-              <XAxis dataKey="date" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Bar dataKey="income" fill="green" name="収入" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="expense" fill="red" name="支出" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={getMonthEntries()} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
+            <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+            <YAxis tick={{ fontSize: 10 }} />
+            <Tooltip />
+            <Bar dataKey="income" fill="#4CAF50" name="収入" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="expense" fill="#F44336" name="支出" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       <div style={{ marginTop: "30px" }}>
         <h3>📈 支出カテゴリ円グラフ</h3>
-        <div style={{ width: "100%", height: "220px" }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={getPieChartData()}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={70}
-                label
-              >
-                {getPieChartData().map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name)} />
-                ))}
-              </Pie>
-              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+        <ResponsiveContainer width="100%" height={240}>
+          <PieChart>
+            <Pie
+              data={getPieChartData()}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={70}
+              label
+              isAnimationActive={true}
+            >
+              {getPieChartData().map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name)} />
+              ))}
+            </Pie>
+            <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
     </motion.div>
   );
